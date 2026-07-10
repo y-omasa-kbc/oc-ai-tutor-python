@@ -208,8 +208,9 @@ oc-ai-tutor-python/
 ├── app/                        # RAG アプリケーション本体
 │   ├── rag/                    # RAG ロジック (検索・生成)
 │   ├── data/                   # ナレッジデータ (日本史コンテンツ)
+│   ├── static/                 # Streamlit の静的ファイル配信
+│   │   └── textbook/           # 実習用テキスト (http://localhost:8501/app/static/textbook/ で配信)
 │   └── web/                    # 動作確認用 Web UI
-└── textbook/                   # 実習用テキスト (受講者が閲覧する Web ページ)
 ```
 
 > ファイル数・配置は実装時に確定します。確定後、本 README を更新してください。

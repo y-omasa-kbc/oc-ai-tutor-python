@@ -44,20 +44,12 @@ html, body {
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
+  display: block;
   min-height: calc(100vh - 84px);
 }
 
 .sidebar {
-  background: #fff;
-  border-right: 1px solid var(--border);
-  padding: 1.4rem 1.2rem;
-  position: sticky;
-  top: 0;
-  align-self: start;
-  max-height: 100vh;
-  overflow-y: auto;
+  display: none;
 }
 
 .sidebar h2 {

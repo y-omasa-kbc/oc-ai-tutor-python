@@ -5,7 +5,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-RUN apt-get update \
+RUN find /etc/apt/sources.list.d/ -type f -name "*yarn*" -delete 2>/dev/null || true \
+ && apt-get update \
  && apt-get install -y --no-install-recommends \
       build-essential \
       curl \

@@ -6,15 +6,9 @@
   },
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
-  "mounts": [
-    "source=oc-ai-tutor-python-venv,target=/workspace/.venv,type=volume"
-  ],
   "containerUser": "vscode",
   "remoteUser": "vscode",
   "features": {
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.11"
-    },
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": false
     }
@@ -26,23 +20,27 @@
         "ms-python.debugpy"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
-        "python.terminal.activateEnvironment": true,
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.terminal.activateEnvironment": false,
         "editor.formatOnSave": false,
         "files.autoSave": "afterDelay"
       }
     }
   },
   "forwardPorts": [
-    8501
+    8501,
+    8502
   ],
   "portsAttributes": {
     "8501": {
       "label": "動作確認用 Web UI (Streamlit)",
       "onAutoForward": "openBrowser"
+    },
+    "8502": {
+      "label": "実習用テキスト (HTTP サーバー)"
     }
   },
-  "postCreateCommand": "python -m venv .venv && .venv/bin/pip install --no-cache-dir -r requirements.txt && .venv/bin/python -m app.data.index",
+  "postCreateCommand": "bash /workspace/.devcontainer/postcreate.sh",
   "onCreateCommand": "mkdir -p .streamlit",
   "containerEnv": {
     "PYTHONUNBUFFERED": "1",

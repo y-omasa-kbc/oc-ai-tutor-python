@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -10,13 +9,26 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.rag.config import OPENROUTER_API_KEY, RETRIEVAL_TOP_K
 from app.rag.pipeline import run
-from app.rag.prompts import SYSTEM_PROMPT
 
 
 st.set_page_config(
-    page_title="AI 家庭教師 (安土桃山〜江戸初期)",
+    page_title="AI 家庭教師",
     page_icon="📜",
     layout="wide",
+)
+
+st.markdown(
+    """
+    <style>
+    .stApp, .stMarkdown, .stTextInput, .stButton, p, div {
+        font-size: 1rem !important;
+    }
+    h2 { font-size: 0.95rem !important; font-weight: 600 !important; }
+    h3 { font-size: 0.9rem !important; }
+    code, pre { font-size: 0.85rem !important; }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 
@@ -35,35 +47,17 @@ def _render_sources(sources):
     ]
 
 
-with st.sidebar:
-    st.header("⚙️ 設定")
+TEXTBOOK_URL = "http://localhost:8502/"
 
-    use_query_transformation = st.toggle(
-        "質問改善 (Query Transformation)",
-        value=False,
-        help="質問を検索しやすい形に書き換えてから探します。",
-    )
-    top_k = st.slider("参考資料の数", min_value=1, max_value=5, value=RETRIEVAL_TOP_K)
+st.title("📜 AI 家庭教師")
 
-    st.divider()
-    st.subheader("現在のシステムプロンプト")
-    st.code(SYSTEM_PROMPT, language="text")
-    st.caption("変更するには `app/rag/prompts.py` を編集して保存してください。")
+st.markdown(
+    f'<a href="{TEXTBOOK_URL}" target="_blank" '
+    f'style="font-size: 0.85em; color: #555; text-decoration: none;">'
+    f'📖 実習用テキストを開く</a>',
+    unsafe_allow_html=True,
+)
 
-    st.divider()
-    st.subheader("📖 実習用テキスト")
-    textbook_path = PROJECT_ROOT / "textbook" / "index.html"
-    if textbook_path.exists():
-        st.markdown(
-            f"<a href='{textbook_path.as_uri()}' target='_blank'>"
-            "テキストを開く (file://)</a>",
-            unsafe_allow_html=True,
-        )
-    else:
-        st.caption("(textbook/ が見つかりません)")
-
-
-st.title("📜 AI 家庭教師 (安土桃山〜江戸初期)")
 st.caption("本能寺の変(1582)から家康の死(1616)まで、資料をもとに答えます。")
 
 question = st.text_input(
@@ -80,10 +74,7 @@ if ask:
 
     with st.spinner("資料を探して、答えを作っています..."):
         try:
-            result = run(
-                query=question,
-                use_query_transformation=use_query_transformation,
-            )
+            result = run(query=question)
         except FileNotFoundError as e:
             st.error(str(e))
             st.stop()
@@ -94,7 +85,7 @@ if ask:
     st.subheader("💬 回答")
     st.write(result.answer)
 
-    if use_query_transformation and result.transformed_question != result.question:
+    if result.transformed_question != result.question:
         with st.expander("🔄 質問改善の結果を見る", expanded=False):
             st.write("**もとの質問:**")
             st.code(result.question, language="text")
@@ -102,7 +93,7 @@ if ask:
             st.code(result.transformed_question, language="text")
 
     st.subheader("📚 参考にした資料")
-    sources = _render_sources(result.sources[:top_k])
+    sources = _render_sources(result.sources[:RETRIEVAL_TOP_K])
     if not sources:
         st.info("該当する資料が見つかりませんでした。")
     for i, s in enumerate(sources, start=1):

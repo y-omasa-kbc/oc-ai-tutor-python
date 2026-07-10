@@ -8,7 +8,6 @@ services:
     working_dir: /workspace
     volumes:
       - .:/workspace
-      - vscode-venv:/workspace/.venv
     env_file:
       - .env
     environment:
@@ -25,10 +24,7 @@ services:
           echo "[setup] ナレッジのインデックスを初回ビルドします..."
           python -m app.data.index
         fi
-        exec python -m streamlit run app/web/app.py \
+        exec python -m streamlit run app/web/main.py \
           --server.address=0.0.0.0 \
           --server.port=8501 \
           --server.runOnSave=true
-
-volumes:
-  vscode-venv:

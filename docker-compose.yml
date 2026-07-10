@@ -1,0 +1,34 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    image: oc-ai-tutor-python:dev
+    container_name: oc-ai-tutor-python
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - vscode-venv:/workspace/.venv
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    ports:
+      - "8501:8501"
+    command:
+      - bash
+      - -c
+      - |
+        if [ ! -f app/data/.cache/chunks.json ] || [ ! -f app/data/.cache/embeddings.npy ]; then
+          echo "[setup] ナレッジのインデックスを初回ビルドします..."
+          python -m app.data.index
+        fi
+        exec python -m streamlit run app/web/app.py \
+          --server.address=0.0.0.0 \
+          --server.port=8501 \
+          --server.runOnSave=true
+
+volumes:
+  vscode-venv:

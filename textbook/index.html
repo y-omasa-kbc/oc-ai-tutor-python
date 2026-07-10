@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>実習用テキスト | AI 家庭教師を作ろう</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="page-header">
+    <h1>AI 家庭教師を作ろう 実習用テキスト</h1>
+    <p class="subtitle">本能寺の変(1582)から家康の死(1616)まで ― 戦国末期〜江戸初期を題材に、RAG と検索改善を体験する</p>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" aria-label="目次">
+      <h2>目次</h2>
+      <ol>
+        <li><a href="#intro">はじめに</a></li>
+        <li><a href="#what-is-rag">RAG とは?</a></li>
+        <li><a href="#simple-rag">単純 RAG を試す</a></li>
+        <li><a href="#search-pitfalls">検索の落とし穴</a></li>
+        <li><a href="#query-transformation">質問改善(Query Transformation)</a></li>
+        <li><a href="#system-prompt">システムプロンプトを変える</a></li>
+        <li><a href="#summary">まとめ</a></li>
+      </ol>
+      <p class="sidebar-note">
+        このページは <strong>コピペ用</strong> です。<br>
+        サンプルコードの <span class="copy-label">コピー</span> ボタンを押して、VSCode のファイルに貼り付けてください。
+      </p>
+    </nav>
+
+    <main class="content">
+      <section id="intro">
+        <h2>1. はじめに</h2>
+        <p>
+          今日は 45 分で、<strong>AI の中身をちょっとだけ改造する</strong> 体験をします。
+          プログラミング経験はゼロで OK。<strong>コピペ中心</strong> なので、PC の操作はそこまで難しくありません。
+        </p>
+        <p>
+          ゴールは 3 つ:
+        </p>
+        <ul>
+          <li>RAG(検索 + 回答生成)の動きを <strong>自分の目で確認</strong> する</li>
+          <li>質問の書き換え(Query Transformation)で <strong>検索の精度が変わる</strong> ことを体感する</li>
+          <li>AI への指示(プロンプト)の書き方で <strong>回答の雰囲気や内容が変わる</strong> ことを体感する</li>
+        </ul>
+        <div class="callout">
+          <strong>画面配置のおすすめ</strong><br>
+          VSCode とこのテキストが並ぶようにウィンドウを <strong>二分割</strong> してください。
+        </div>
+      </section>
+
+      <section id="what-is-rag">
+        <h2>2. RAG とは?</h2>
+        <p>
+          RAG は <strong>Retrieval-Augmented Generation</strong> の略で、日本語にすると「<strong>検索して、答えを作らせる</strong>」手法です。
+        </p>
+        <p>次の 4 つのステップで動きます:</p>
+        <ol>
+          <li>ユーザーが <strong>質問</strong> を入力する</li>
+          <li>AI が <strong>資料</strong> の中から、質問に合いそうなものを <strong>検索</strong> する</li>
+          <li>見つけた資料を <strong>LLM</strong> に渡す</li>
+          <li>LLM が資料を読みながら <strong>回答</strong> を作る</li>
+        </ol>
+        <p>
+          普通の ChatGPT と違うのは、<strong>資料を渡してから答えさせる</strong> ところです。
+          今日はこの「資料を渡すところ」を、実際に <strong>江戸時代の歴史</strong> でやってみます。
+        </p>
+      </section>
+
+      <section id="simple-rag">
+        <h2>3. 単純 RAG を試す</h2>
+        <p>
+          いま右側に出ている Web UI(画面に表示されているアプリ)が <strong>単純 RAG</strong> です。
+          質問を入れると、AI が資料(「秀吉の天下統一」「関ヶ原への道」「江戸幕府の確立」)から答えを探して答えてくれます。
+        </p>
+        <p><strong>やってみよう:</strong></p>
+        <ol>
+          <li>隣のウィンドウでアプリを表示</li>
+          <li>例: <code>本能寺の変を起こした人物は?</code> と入力して送信</li>
+          <li>「参考にした資料」の欄に <strong>どの資料が引かれたか</strong> が出るので確認</li>
+        </ol>
+        <p>
+          質問の <strong>言葉そのまま</strong> で資料を探すので、<strong>質問の言い回し</strong> が大事、というのがポイントです。
+        </p>
+      </section>
+
+      <section id="search-pitfalls">
+        <h2>4. 検索の落とし穴</h2>
+        <p>
+          質問が <strong>長すぎたり、抽象的だったり</strong> すると、思った資料が引かれません。
+        </p>
+        <p><strong>失敗しやすい質問の例</strong>(講師のデモを観察):</p>
+        <ul>
+          <li>「信長の後継者争いの結果、最終的に誰が天下人になった?」</li>
+          <li>「家康が天下を取った経緯をざっくり教えて」</li>
+        </ul>
+        <p>
+          これらは <strong>質問の言葉</strong> と <strong>資料の中の言葉</strong> がズレているため、
+          単純 RAG だと <strong>まったく違う資料</strong> が引かれたり、回答がぼんやりしたりします。
+        </p>
+        <p>
+          そこで次は、AI に <strong>質問を作り直させる</strong> 機能を追加します。
+        </p>
+      </section>
+
+      <section id="query-transformation">
+        <h2>5. 質問改善(Query Transformation)を実装する</h2>
+        <p>
+          <strong>Query Transformation</strong> とは、AI に「<strong>この人、こういう意味で聞いてるな</strong>」と解釈させて、
+          検索しやすい <strong>別の言い回し</strong> に変換してから資料を探すテクニックです。
+        </p>
+        <p>
+          具体的には、LLM に「曖昧な検索クエリを、明確で簡潔な検索クエリに書き直して」とお願いする関数を 1 個入れます。
+        </p>
+
+        <h3>手順</h3>
+        <ol>
+          <li>VSCode で <code>app/rag/query_transformer.py</code> を開く</li>
+          <li>下の <span class="copy-label">コピー</span> ボタンで <strong>サンプル全体</strong> をコピー</li>
+          <li>VSCode に戻って <kbd>Ctrl</kbd>+<kbd>A</kbd> で全選択 → <kbd>Delete</kbd> で中身を消す</li>
+          <li>コピーしたサンプルを <kbd>Ctrl</kbd>+<kbd>V</kbd> で貼り付け</li>
+          <li><kbd>Ctrl</kbd>+<kbd>S</kbd> で保存(右側の Web UI は自動でリロードされます)</li>
+        </ol>
+
+        <h3>コピーするコード</h3>
+        <p>
+          下の <strong>「コピー」ボタン</strong> を押してください。コードがクリップボードにコピーされます。
+        </p>
+        <div class="code-block">
+          <pre><code id="code-query-transformer">import os
+
+from app.rag.llm import chat
+
+QUERY_REWRITE_SYSTEM_PROMPT = (
+    "あなたは日本語の検索クエリを、検索エンジンやベクトル検索にかけやすい形に整えるアシスタントです。"
+    "ユーザーの質問が曖昧だったり長かったりする場合は、"
+    "元の意図を保ったまま、具体的で簡潔な検索クエリに書き直してください。"
+    "質問がすでに明確で短い場合は、そのまま返してください。"
+    "余計な説明はせず、書き換えたクエリだけを出力してください。"
+)
+
+
+def transform_query(query: str) -> str:
+    if not query.strip():
+        return query
+
+    if os.getenv("DISABLE_QUERY_TRANSFORM", "0") == "1":
+        return query
+
+    messages = [
+        {"role": "system", "content": QUERY_REWRITE_SYSTEM_PROMPT},
+        {"role": "user", "content": query},
+    ]
+    try:
+        rewritten = chat(messages=messages, temperature=0.0)
+        return rewritten.strip() or query
+    except Exception:
+        return query
+</code></pre>
+          <button class="copy-btn" data-target="code-query-transformer">コピー</button>
+        </div>
+
+        <div class="callout">
+          <strong>確認してみよう</strong><br>
+          Web UI の左サイドバーで <strong>「質問改善 (Query Transformation)」</strong> を ON にして、
+          さっき失敗した質問をもう一度入れてみてください。引かれる資料や回答が <strong>変わる</strong> はずです。
+        </div>
+      </section>
+
+      <section id="system-prompt">
+        <h2>6. システムプロンプトを変える</h2>
+        <p>
+          ここまでは「<strong>資料を探す</strong>」側を変えてきました。
+          ここでは「<strong>回答を作る</strong>」側の AI への指示、<strong>システムプロンプト</strong> をいじってみます。
+        </p>
+        <p>
+          同じ資料と質問でも、<strong>指示の書き方</strong> で回答の雰囲気や内容が変わります。
+        </p>
+
+        <h3>手順</h3>
+        <ol>
+          <li>VSCode で <code>app/rag/prompts.py</code> を開く</li>
+          <li>下の <span class="copy-label">コピー</span> ボタンで、好みの <strong>雛形サンプル</strong> をコピー</li>
+          <li><code>SYSTEM_PROMPT</code> の中身を貼り付けて <strong>1 箇所だけ書き換え</strong>(★コメントを目印に)</li>
+          <li>保存 → Web UI で同じ質問を実行</li>
+        </ol>
+
+        <h3>雛形サンプル A: もっとカジュアルに</h3>
+        <p>堅い歴史の文章を、友達に説明するような口調にしたいとき。</p>
+        <div class="code-block">
+          <pre><code id="code-prompt-casual">SYSTEM_PROMPT = (
+    "あなたは江戸時代の歴史に詳しい、友達みたいな『歴史の家庭教師』です。"
+    "ユーザーからの質問に対して、与えられた参考資料だけを根拠に、"
+    "★中学生にもわかるよう、タメ口で、親しみやすく答えてください。"
+    "回答は3〜6文程度の短さを心がけ、結論→理由→具体例 の順で話してください。"
+    "参考資料に書かれていないことは推測せず、"
+    "分からない場合は『ごめん、参考資料からは分からんわ』と正直に答えてください。"
+)
+</code></pre>
+          <button class="copy-btn" data-target="code-prompt-casual">コピー</button>
+        </div>
+
+        <h3>雛形サンプル B: 出典を必ず示す</h3>
+        <p>出典の明示を徹底したいとき。用語集・レポート向け。</p>
+        <div class="code-block">
+          <pre><code id="code-prompt-citation">SYSTEM_PROMPT = (
+    "あなたは江戸時代の歴史に詳しい、厳密な『歴史研究助手』です。"
+    "ユーザーからの質問に対して、与えられた参考資料だけを根拠に、"
+    "★回答の末尾に必ず [資料: ファイル名] の形で出典を明記してください。"
+    "回答は3〜6文程度の短さを心がけ、結論→理由→具体例 の順で話してください。"
+    "参考資料に書かれていないことは推測せず、"
+    "分からない場合は『参考資料からは分かりません』と正直に答えてください。"
+)
+</code></pre>
+          <button class="copy-btn" data-target="code-prompt-citation">コピー</button>
+        </div>
+
+        <h3>雛形サンプル C: 初心者向けに噛み砕く</h3>
+        <p>歴史をほぼ知らない相手に教える場面。</p>
+        <div class="code-block">
+          <pre><code id="code-prompt-beginner">SYSTEM_PROMPT = (
+    "あなたは江戸時代の歴史に詳しい、はじめての人に寄り添う『歴史の家庭教師』です。"
+    "ユーザーからの質問に対して、与えられた参考資料だけを根拠に、"
+    "★中学1年生にもわかる言葉で、むずかしい漢字は開き直さず、易しい言葉に置き換えて答えてください。"
+    "回答は3〜6文程度の短さを心がけ、結論→理由→具体例 の順で話してください。"
+    "参考資料に書かれていないことは推測せず、"
+    "分からない場合は『参考資料からは分かりません』と正直に答えてください。"
+)
+</code></pre>
+          <button class="copy-btn" data-target="code-prompt-beginner">コピー</button>
+        </div>
+
+        <div class="callout">
+          <strong>★ここを変える</strong><br>
+          雛形の中の <code>★</code> で始まる 1 文を <strong>別の指示</strong> に書き換えてみてください。
+          例: <em>「語尾を『である調」に」「100字以内で要約して」「受験生の質問に答える気持ちで」</em>
+        </div>
+      </section>
+
+      <section id="summary">
+        <h2>7. まとめ</h2>
+        <p>今日やったことを 3 行で:</p>
+        <ul>
+          <li><strong>RAG の検索は質問の言い回しに弱い</strong> → 質問が長い・抽象的だと資料を外す</li>
+          <li><strong>質問を作り直させると改善する</strong> → Query Transformation で検索ヒットが安定する</li>
+          <li><strong>指示の書き方で回答が変わる</strong> → システムプロンプト 1 行で AI のキャラクターが動く</li>
+        </ul>
+        <p>
+          全部 <strong>コピペ</strong> でできたのに、中身は結構本格的でしたよね。<br>
+          家に帰っても触りたい人は、フォローアップの Web アプリ URL を忘れずに!
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

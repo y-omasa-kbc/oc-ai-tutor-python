@@ -1,6 +1,6 @@
-streamlit>=1.32.0
-requests>=2.31.0
-python-dotenv>=1.0.0
-numpy>=1.26.0
-sentence-transformers>=2.6.1
-torchvision
+streamlit==1.59.2
+requests==2.34.2
+python-dotenv==1.2.2
+numpy==2.4.6
+sentence-transformers==5.6.0
+torchvision==0.28.0

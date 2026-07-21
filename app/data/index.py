@@ -12,13 +12,52 @@ from app.rag.config import (
 from app.rag.embeddings import embed_texts
 
 
+def _split_by_headings(source: str, text: str) -> list[dict]:
+    chunks: list[dict] = []
+    lines = text.splitlines()
+
+    chapter = ""
+    section = ""
+    buffer: list[str] = []
+
+    def flush() -> None:
+        body = "\n".join(buffer).strip()
+        if not body:
+            return
+        header_parts = [p for p in (chapter, section) if p]
+        if header_parts:
+            body_with_header = "[{}]\n{}".format(" / ".join(header_parts), body)
+            source_suffix = " § " + (section or chapter)
+        else:
+            body_with_header = body
+            source_suffix = ""
+        chunks.append({"source": source + source_suffix, "text": body_with_header})
+
+    for line in lines:
+        if line.startswith("### "):
+            flush()
+            buffer = []
+            section = line[4:].strip()
+        elif line.startswith("## "):
+            flush()
+            buffer = []
+            chapter = line[3:].strip()
+            section = ""
+        elif line.startswith("# "):
+            continue
+        else:
+            buffer.append(line)
+    flush()
+    return chunks
+
+
 def load_markdown_files(directory: Path) -> list[dict]:
     chunks: list[dict] = []
     for path in sorted(directory.glob("*.md")):
         text = path.read_text(encoding="utf-8").strip()
         if not text:
             continue
-        chunks.append({"source": path.name, "text": text})
+        chunks.extend(_split_by_headings(path.name, text))
     return chunks
 
 

@@ -14,10 +14,10 @@ OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 
 EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL",
-    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "intfloat/multilingual-e5-base",
 )
 
-RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "3"))
+RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "1"))
 
 DATA_DIR = PROJECT_ROOT / "app" / "data"
 HISTORY_DIR = DATA_DIR / "history"

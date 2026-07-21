@@ -16,7 +16,7 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 def chat(
     messages: Iterable[dict],
     model: str | None = None,
-    temperature: float = 0.3,
+    temperature: float = 0.0,
 ) -> str:
     api_key = os.getenv("OPENROUTER_API_KEY", OPENROUTER_API_KEY)
     if not api_key:

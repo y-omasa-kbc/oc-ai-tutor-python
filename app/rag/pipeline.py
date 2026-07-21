@@ -34,7 +34,8 @@ def run(query: str, use_query_transformation: bool = True) -> RagResult:
     user_prompt = (
         f"質問: {query}\n\n"
         f"参考資料:\n{_format_context(sources)}\n\n"
-        "参考資料だけを使って答えてください。"
+        "上の参考資料に書かれていることだけを情報源にして答えてください。"
+        "参考資料に該当する記述が無い場合は、必ず『参考資料からは分かりません』と答えてください。"
     )
     answer = chat(
         messages=[

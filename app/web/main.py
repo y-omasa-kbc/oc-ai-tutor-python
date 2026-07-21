@@ -20,6 +20,12 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    header[data-testid="stHeader"] { display: none; }
+    [data-testid="stToolbar"] { display: none; }
+    [data-testid="stMainBlockContainer"],
+    .block-container {
+        padding-top: 1rem !important;
+    }
     .stApp, .stMarkdown, .stTextInput, .stButton, p, div {
         font-size: 1rem !important;
     }

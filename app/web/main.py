@@ -97,5 +97,5 @@ if ask:
     if not sources:
         st.info("該当する資料が見つかりませんでした。")
     for i, s in enumerate(sources, start=1):
-        with st.expander(f"[資料 {i}] {s['source']}  (score={s['score']})", expanded=(i == 1)):
+        with st.expander(f"[資料 {i}] {s['source']}  (score={s['score']})", expanded=False):
             st.write(s["text"])

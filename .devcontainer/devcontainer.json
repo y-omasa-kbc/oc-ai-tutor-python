@@ -41,6 +41,7 @@
     }
   },
   "postCreateCommand": "bash /workspace/.devcontainer/postcreate.sh",
+  "postStartCommand": "bash /workspace/.devcontainer/poststart.sh",
   "onCreateCommand": "mkdir -p .streamlit",
   "containerEnv": {
     "PYTHONUNBUFFERED": "1",

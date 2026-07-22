@@ -179,9 +179,6 @@ html, body {
 }
 
 .copy-btn {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
   background: var(--accent);
   color: #fff;
   border: none;
@@ -193,12 +190,44 @@ html, body {
   transition: background 0.15s;
 }
 
+.code-block .copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
 .copy-btn:hover {
   background: #8e3a25;
 }
 
 .copy-btn.copied {
   background: #2e7d32;
+}
+
+.query-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0 1rem;
+}
+
+.query-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.query-item code {
+  flex: 1;
+  background: #efece4;
+  padding: 0.35rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  word-break: break-all;
+}
+
+.query-item .copy-btn {
+  flex-shrink: 0;
 }
 
 @media (max-width: 720px) {

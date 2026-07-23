@@ -14,6 +14,7 @@ else
     --server.address=0.0.0.0 \
     --server.port=8501 \
     --server.runOnSave=true \
+    --server.fileWatcherType=poll \
     > /tmp/streamlit.log 2>&1 &
   echo "[poststart] streamlit PID=$!" >> "$LOG"
 fi

@@ -9,7 +9,7 @@ font = "sans serif"
 [server]
 headless = true
 runOnSave = true
-fileWatcherType = "auto"
+fileWatcherType = "poll"
 enableStaticServing = true
 
 [browser]
